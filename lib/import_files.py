@@ -22,5 +22,14 @@ def move_files(camera_folder, drafts_folder):
         dst_file = os.path.join(dest_path, file)
         shutil.copy2(src_file, dst_file)
 
-  print(f"imported files to {target_folder}")
   return target_folder
+
+def delete_files(camera_folder):
+  # remove files from camera
+
+  for root, dirs, files in os.walk(camera_folder):
+      for file in files:
+         src_file = os.path.join(root, file)
+         os.remove(src_file) 
+
+  return camera_folder
