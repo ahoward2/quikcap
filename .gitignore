@@ -1,0 +1,12 @@
+# python
+.venv/
+activate/
+
+# python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+
+# test directory
+test_data/
