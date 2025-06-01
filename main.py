@@ -6,7 +6,9 @@ from PySide6.QtWidgets import (
   QLabel, 
   QWidget, 
   QVBoxLayout,
-  QPushButton
+  QHBoxLayout,
+  QPushButton,
+  QFrame
 )
 
 camera_folder = "test_data/fake_camera"
@@ -17,17 +19,29 @@ class MainWindow(QWidget):
     super().__init__()
 
     self.setWindowTitle("QuikCap")
+    
+    self.main_layout = QVBoxLayout()
 
     self.output_label = QLabel("Click button to import files")
     self.import_button = QPushButton("Import files")
     self.delete_button = QPushButton("Delete files")
 
-    layout = QVBoxLayout()
-    layout.addWidget(self.output_label)
-    layout.addWidget(self.import_button)
-    layout.addWidget(self.delete_button)
+    self.main_layout.addWidget(self.import_button)
+    self.main_layout.addWidget(self.delete_button)
+    self.main_layout.addStretch()
 
-    self.setLayout(layout)
+    self.footer = QFrame()
+    self.footer.setFrameShape(QFrame.Shape.NoFrame)
+
+    self.footer_layout = QHBoxLayout()
+    self.footer_layout.setContentsMargins(1, 0, 1, 0)
+    self.output_label = QLabel("Ready.")
+    self.footer_layout.addWidget(self.output_label)
+
+    self.footer.setLayout(self.footer_layout)
+    self.main_layout.addWidget(self.footer)
+
+    self.setLayout(self.main_layout)
     self.resize(300, 100)
 
     # events
