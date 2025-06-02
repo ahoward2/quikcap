@@ -2,4 +2,4 @@
 [project]
 name = "my-desktop-app"
 version = "0.1.0"
-dependencies = ["pyside6"]
+dependencies = ["pyside6", "pywin32"]
