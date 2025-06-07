@@ -1,14 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>QuikCap</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: radial-gradient(ellipse at top, #3b0764, #1e1b4b);
+    }
+  </style>
 </head>
 
-<body>
-  <h1>Download QuikCap</h1>
-  <p><a href='https://github.com/ahoward2/quikcap/releases/latest/download/QuikCapInstaller.exe'>Download Latest
-      Installer</a></p>
+<body class="text-white min-h-screen flex items-center justify-center px-4">
+  <div
+    class="bg-white/5 backdrop-blur-sm shadow-xl rounded-2xl p-10 max-w-md w-full border border-white/10 text-center">
+
+    <!-- Logo -->
+    <img src="logo.png" alt="QuikCap Logo" class="mx-auto mb-6 w-24 h-24 object-contain" />
+
+    <h1 class="text-4xl font-extrabold text-purple-300 mb-2 tracking-tight">QuikCap</h1>
+    <p class="text-sm text-purple-100 mb-6">
+      Instantly dump footage from your camera to clean draft folders. No friction. Just flow.
+    </p>
+    <a href="https://github.com/ahoward2/quikcap/releases/latest/download/QuikCapInstaller.exe"
+      class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-lg">
+      Download Latest Installer
+    </a>
+    <p id="version" class="text-xs text-purple-200 mt-4">Windows only — fetching version…</p>
+  </div>
+
+  <script>
+    fetch('https://api.github.com/repos/ahoward2/quikcap/releases/latest')
+      .then(res => res.json())
+      .then(data => {
+        const tag = data.tag_name || 'unknown';
+        document.getElementById('version').innerText = `Windows only — ${tag}`;
+      })
+      .catch(() => {
+        document.getElementById('version').innerText = 'Windows only — version unknown';
+      });
+  </script>
 </body>
 
 </html>
