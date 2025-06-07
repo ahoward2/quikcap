@@ -111,16 +111,18 @@ class MainWindow(QWidget):
         self.log_output.append("Starting transfer...")
 
         if conn_type == "MTP":
+            QMessageBox.warning(
+                self, "Warning", "MTP transfer is not supported yet. Please use USB Mass Storage mode.")
             # Run MTP transfer directly on main thread (blocks UI)
-            try:
-                folder = move_files_from_mtp(
-                    camera_path, drafts_folder, log_fn=self.log_output.append)
-            except Exception as e:
-                QMessageBox.critical(self, "Transfer Error", str(e))
-            else:
-                QMessageBox.information(
-                    self, "Success", f"Files moved to:\n{folder}")
-            self.import_button.setEnabled(True)
+            # try:
+            #     folder = move_files_from_mtp(
+            #         camera_path, drafts_folder, log_fn=self.log_output.append)
+            # except Exception as e:
+            #     QMessageBox.critical(self, "Transfer Error", str(e))
+            # else:
+            #     QMessageBox.information(
+            #         self, "Success", f"Files moved to:\n{folder}")
+            # self.import_button.setEnabled(True)
 
         else:
             # USB Mass Storage in background thread
@@ -132,7 +134,6 @@ class MainWindow(QWidget):
             self.worker.finished.connect(self.on_transfer_complete)
             self.worker.error.connect(self.on_transfer_error)
             self.worker.log.connect(self.log_output.append)
-
             # Clean up
             self.worker.finished.connect(self.thread.quit)
             self.worker.finished.connect(self.worker.deleteLater)

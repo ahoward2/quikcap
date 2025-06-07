@@ -1,3 +1,4 @@
+import win32file
 import win32com.client
 import win32api
 
@@ -34,7 +35,7 @@ def get_connected_devices():
             continue
 
         # Check drive type
-        drive_type = win32api.GetDriveType(d)
+        drive_type = win32file.GetDriveType(d)
         # DRIVE_REMOVABLE = 2, DRIVE_FIXED = 3, DRIVE_REMOTE = 4, DRIVE_CDROM = 5, DRIVE_RAMDISK = 6
         if drive_type == 2 or drive_type == 3:
             # Check if drive has a volume label that suggests camera
