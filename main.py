@@ -2,6 +2,7 @@
 import sys
 from lib.workers.transfer_worker import FileTransferWorker
 from lib.workers.delete_worker import FileDeleteWorker
+from lib.build_helpers import resource_path
 from PySide6.QtCore import QThread, QSettings
 from PySide6.QtWidgets import (
     QApplication,
@@ -30,7 +31,7 @@ class MainWindow(QWidget):
         self.settings = QSettings(UIStrings.ORG_NAME, UIStrings.APP_NAME)
 
         self.setWindowTitle(UIStrings.APP_NAME)
-        self.setWindowIcon(QIcon("assets/favicon.ico"))
+        self.setWindowIcon(QIcon(resource_path("assets/favicon.ico")))
         self.main_layout = QVBoxLayout()
         self.content_layout = QHBoxLayout()
         self.left_layout = QVBoxLayout()
@@ -229,7 +230,7 @@ class MainWindow(QWidget):
 
     def load_instructions(self):
         try:
-            with open("assets/instructions.html", "r", encoding="utf-8") as f:
+            with open(resource_path("assets/instructions.html"), "r", encoding="utf-8") as f:
                 self.instructions_box.setHtml(f.read())
         except Exception as e:
             self.instructions_box.setText("Instructions could not be loaded.")

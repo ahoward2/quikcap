@@ -10,3 +10,7 @@ __pycache__/
 
 # test directory
 test_data/
+
+# build
+build/
+dist/
