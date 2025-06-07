@@ -5,9 +5,11 @@ from lib.workers.delete_worker import FileDeleteWorker
 from PySide6.QtCore import QThread, QSettings
 from PySide6.QtWidgets import (
     QApplication,
+    QFrame,
     QLabel,
     QWidget,
     QVBoxLayout,
+    QHBoxLayout,
     QPushButton,
     QLineEdit,
     QFileDialog,
@@ -28,6 +30,8 @@ class MainWindow(QWidget):
 
         self.setWindowTitle(UIStrings.APP_NAME)
         self.main_layout = QVBoxLayout()
+        self.content_layout = QHBoxLayout()
+        self.left_layout = QVBoxLayout()
 
         self.camera_label = QLabel(UIStrings.CAMERA_PATH_LABEL)
         self.camera_input = QLineEdit()
@@ -37,6 +41,7 @@ class MainWindow(QWidget):
         self.target_input = QLineEdit()
         self.target_input.setReadOnly(True)
         self.target_browse_btn = QPushButton(UIStrings.BROWSE_BUTTON_LABEL)
+        self.actions_label = QLabel(UIStrings.ACTIONS_LABEL)
         self.import_button = QPushButton(UIStrings.IMPORT_BUTTON_LABEL)
         self.delete_button = QPushButton(UIStrings.DELETE_BUTTON_LABEL)
         self.log_output = QTextEdit(UIStrings.READY_MSG)
@@ -45,28 +50,45 @@ class MainWindow(QWidget):
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setVisible(False)
         self.progress_bar.setValue(0)
+        self.instructions_box = QTextEdit()
+        self.instructions_box.setReadOnly(True)
 
         self.restore_settings()
 
-        self.main_layout.addWidget(self.camera_label)
-        self.main_layout.addWidget(self.camera_input)
-        self.main_layout.addWidget(self.camera_browse_btn)
-        self.main_layout.addWidget(self.target_label)
-        self.main_layout.addWidget(self.target_input)
-        self.main_layout.addWidget(self.target_browse_btn)
-        self.main_layout.addWidget(self.import_button)
-        self.main_layout.addWidget(self.delete_button)
-        self.main_layout.addStretch()
-        self.main_layout.addWidget(self.log_output)
-        self.main_layout.addWidget(self.progress_bar)
+        self.left_layout.addWidget(self.camera_label)
+        self.left_layout.addWidget(self.camera_input)
+        self.left_layout.addWidget(self.camera_browse_btn)
+        self.left_layout.addWidget(self.create_horizontal_divider())
+        self.left_layout.addWidget(self.target_label)
+        self.left_layout.addWidget(self.target_input)
+        self.left_layout.addWidget(self.target_browse_btn)
+        self.left_layout.addWidget(self.create_horizontal_divider())
+        self.left_layout.addWidget(self.actions_label)
+        self.left_layout.addWidget(self.import_button)
+        self.left_layout.addWidget(self.delete_button)
 
         self.setLayout(self.main_layout)
+        self.content_layout.addLayout(self.left_layout, stretch=2)
+        self.content_layout.addWidget(self.instructions_box, stretch=3)
+
+        self.main_layout.addLayout(self.content_layout)
+
+        self.main_layout.addWidget(self.log_output)
+        self.main_layout.addWidget(self.progress_bar)
         self.resize(DefaultWindowSize.WIDTH, DefaultWindowSize.HEIGHT)
 
         self.camera_browse_btn.clicked.connect(self.browse_camera)
         self.target_browse_btn.clicked.connect(self.browse_target)
         self.import_button.clicked.connect(self.do_transfer)
         self.delete_button.clicked.connect(self.do_delete)
+
+        self.load_instructions()
+
+    def create_horizontal_divider(self):
+        divider = QFrame()
+        divider.setFrameShape(QFrame.HLine)
+        divider.setFrameShadow(QFrame.Sunken)
+        return divider
 
     def switch_action_buttons(self, enable: bool):
         self.import_button.setEnabled(enable)
@@ -179,7 +201,7 @@ class MainWindow(QWidget):
         self.thread.start()
 
     def on_delete_complete(self, folder):
-        QMessageBox.information(self, UIStrings.DELETE_COMPLETE_MSG,
+        QMessageBox.information(self, "Deletion Complete",
                                 UIStrings.FILES_DELETED_MSG.format(folder))
 
     def on_delete_error(self, error_msg):
@@ -200,6 +222,14 @@ class MainWindow(QWidget):
             self.thread.quit()
             self.thread.wait()
         event.accept()
+
+    def load_instructions(self):
+        try:
+            with open("assets/instructions.html", "r", encoding="utf-8") as f:
+                self.instructions_box.setHtml(f.read())
+        except Exception as e:
+            self.instructions_box.setText("Instructions could not be loaded.")
+            print(f"Failed to load instructions.html: {e}")
 
 
 if __name__ == "__main__":

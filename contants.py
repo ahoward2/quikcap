@@ -4,18 +4,19 @@ class SettingsKeys:
 
 
 class DefaultWindowSize:
-    WIDTH = 400
-    HEIGHT = 500
+    WIDTH = 600
+    HEIGHT = 400
 
 
 class UIStrings:
     ORG_NAME = "ABHVR"
     APP_NAME = "QuikCap"
-    CAMERA_PATH_LABEL = "Camera Path:"
-    TARGET_PATH_LABEL = "Target Folder (Dump Directory):"
-    BROWSE_BUTTON_LABEL = "Browse..."
+    CAMERA_PATH_LABEL = "Camera Folder (Source Directory)"
+    TARGET_PATH_LABEL = "Target Folder (Dump Directory)"
+    ACTIONS_LABEL = "Actions"
+    BROWSE_BUTTON_LABEL = "Browse"
     IMPORT_BUTTON_LABEL = "Import files"
-    DELETE_BUTTON_LABEL = "Delete files"
+    DELETE_BUTTON_LABEL = "Empty camera"
     CAMERA_DIR_CAPTION = "Select Camera Folder"
     TARGET_DIR_CAPTION = "Select Target Folder"
     READY_MSG = "Ready."
