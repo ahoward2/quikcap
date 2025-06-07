@@ -1,5 +1,5 @@
 from PySide6.QtCore import QObject, Signal
-from lib.import_files import move_files_from_filesystem
+from lib.file_ops import move_files_from_filesystem
 
 
 class FileTransferWorker(QObject):
