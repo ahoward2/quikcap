@@ -53,6 +53,8 @@ jobs:
       - name: Create Release and Upload Installer
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ github.event.inputs.tag }}
+          release_name: "Release ${{ github.event.inputs.tag }}"
           files: ./Output/QuikCapInstaller.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
