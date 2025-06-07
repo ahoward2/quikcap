@@ -1,7 +1,7 @@
 # main.py
 import sys
 from lib.transfer_worker import FileTransferWorker
-from PySide6.QtCore import QThread
+from PySide6.QtCore import QThread, QSettings
 from PySide6.QtWidgets import (
     QApplication,
     QLabel,
@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QProgressBar,
 )
+from contants import SettingsKeys, UIStrings, DefaultWindowSize
 
 
 class MainWindow(QWidget):
@@ -22,25 +23,29 @@ class MainWindow(QWidget):
         self.thread = None
         self.worker = None
 
-        self.setWindowTitle("QuikCap")
+        self.settings = QSettings(UIStrings.ORG_NAME, UIStrings.APP_NAME)
+
+        self.setWindowTitle(UIStrings.APP_NAME)
         self.main_layout = QVBoxLayout()
 
-        self.camera_label = QLabel("Camera Path:")
+        self.camera_label = QLabel(UIStrings.CAMERA_PATH_LABEL)
         self.camera_input = QLineEdit()
-        self.camera_browse_btn = QPushButton("Browse...")
+        self.camera_browse_btn = QPushButton(UIStrings.BROWSE_BUTTON_LABEL)
         self.camera_input.setReadOnly(True)
-        self.target_label = QLabel("Target Folder (Dump Directory):")
+        self.target_label = QLabel(UIStrings.TARGET_PATH_LABEL)
         self.target_input = QLineEdit()
         self.target_input.setReadOnly(True)
-        self.target_browse_btn = QPushButton("Browse...")
-        self.import_button = QPushButton("Import files")
-        self.delete_button = QPushButton("Delete files")
-        self.log_output = QTextEdit("Ready.\n")
+        self.target_browse_btn = QPushButton(UIStrings.BROWSE_BUTTON_LABEL)
+        self.import_button = QPushButton(UIStrings.IMPORT_BUTTON_LABEL)
+        self.delete_button = QPushButton(UIStrings.DELETE_BUTTON_LABEL)
+        self.log_output = QTextEdit(UIStrings.READY_MSG)
         self.log_output.setReadOnly(True)
         self.progress_bar = QProgressBar()
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setVisible(False)
         self.progress_bar.setValue(0)
+
+        self.restore_settings()
 
         self.main_layout.addWidget(self.camera_label)
         self.main_layout.addWidget(self.camera_input)
@@ -55,28 +60,42 @@ class MainWindow(QWidget):
         self.main_layout.addWidget(self.progress_bar)
 
         self.setLayout(self.main_layout)
-        self.resize(300, 100)
+        self.resize(DefaultWindowSize.WIDTH, DefaultWindowSize.HEIGHT)
 
-        # events
         self.camera_browse_btn.clicked.connect(self.browse_camera)
         self.target_browse_btn.clicked.connect(self.browse_target)
         self.import_button.clicked.connect(self.do_transfer)
         # self.delete_button.clicked.connect(self.handle_delete_button_click)
 
+    def restore_settings(self):
+        camera_path = self.settings.value(SettingsKeys.CAMERA_PATH, "")
+        target_path = self.settings.value(SettingsKeys.TARGET_PATH, "")
+
+        if camera_path:
+            self.camera_input.setText(camera_path)
+        if target_path:
+            self.target_input.setText(target_path)
+
     def browse_camera(self):
-        folder = QFileDialog.getExistingDirectory(self, "Select Camera Folder")
+        initial_path = self.camera_input.text().strip() or ""
+        folder = QFileDialog.getExistingDirectory(
+            self, UIStrings.CAMERA_DIR_CAPTION, initial_path)
         if folder:
             self.camera_input.setText(folder)
+            self.settings.setValue(SettingsKeys.CAMERA_PATH, folder)
 
     def browse_target(self):
-        folder = QFileDialog.getExistingDirectory(self, "Select Target Folder")
+        initial_path = self.target_input.text().strip() or ""
+        folder = QFileDialog.getExistingDirectory(
+            self, UIStrings.TARGET_DIR_CAPTION, initial_path)
         if folder:
             self.target_input.setText(folder)
+            self.settings.setValue(SettingsKeys.TARGET_PATH, folder)
 
     def do_transfer(self):
         # Ignore if already running
         if self.thread and self.thread.isRunning():
-            self.log_output.append("Transfer already in progress.")
+            self.log_output.append(UIStrings.TRANSFER_ALREADY_RUNNING_MSG)
             return
 
         camera_path = self.camera_input.text().strip()
@@ -84,11 +103,11 @@ class MainWindow(QWidget):
 
         if not drafts_folder:
             QMessageBox.warning(
-                self, "Warning", "Please select a target folder.")
+                self, "Warning", UIStrings.TARGET_FOLDER_NOT_SET_MSG)
             return
 
         self.import_button.setEnabled(False)
-        self.log_output.append("Starting transfer...")
+        self.log_output.append(UIStrings.STARTING_TRANSFER_MSG)
 
         self.thread = QThread()
         self.worker = FileTransferWorker(camera_path, drafts_folder)
@@ -113,10 +132,11 @@ class MainWindow(QWidget):
         self.thread.start()
 
     def on_transfer_complete(self, folder):
-        QMessageBox.information(self, "Success", f"Files moved to:\n{folder}")
+        QMessageBox.information(
+            self, "Success", UIStrings.TRANSFER_COMPLETE_MSG.format(folder))
 
     def on_transfer_error(self, error_msg):
-        self.log_output.append(f"Error: {error_msg}")
+        self.log_output.append(UIStrings.TRANSFER_ERROR_MSG.format(error_msg))
         self.progress_bar.setVisible(False)
         QMessageBox.critical(self, "Transfer Error", error_msg)
 
@@ -128,8 +148,7 @@ class MainWindow(QWidget):
 
     def closeEvent(self, event):
         if self.thread and self.thread.isRunning():
-            self.log_output.append(
-                "Waiting for transfer to finish before closing...")
+            self.log_output.append(UIStrings.WAIT_FOR_CLOSE_MSG)
             self.thread.quit()
             self.thread.wait()
         event.accept()
