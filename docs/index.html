@@ -33,6 +33,7 @@
       Download Latest Installer
     </a>
     <p id="version" class="text-xs text-purple-200 mt-4">Windows only — fetching version…</p>
+    <p id="total-downloads" class="text-xs text-purple-200 mt-1">Loading total downloads...</p>
 
     <!-- Credit -->
     <p class="mt-8 text-xs text-purple-400 opacity-70">© 2025 Austin Howard</p>
@@ -47,6 +48,45 @@
       })
       .catch(() => {
         document.getElementById('version').innerText = 'Windows only — version unknown';
+      });
+
+    async function fetchTotalDownloads() {
+      const owner = 'ahoward2';
+      const repo = 'quikcap';
+      let page = 1;
+      let totalDownloads = 0;
+      const perPage = 100;
+
+      while (true) {
+        const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases?per_page=${perPage}&page=${page}`, {
+          headers: { 'Accept': 'application/vnd.github+json' }
+        });
+        const releases = await response.json();
+
+        if (!Array.isArray(releases) || releases.length === 0) break;
+
+        releases.forEach(release => {
+          if (release.assets && release.assets.length) {
+            release.assets.forEach(asset => {
+              totalDownloads += asset.download_count;
+            });
+          }
+        });
+
+        if (releases.length < perPage) break; // last page
+        page++;
+      }
+
+      return totalDownloads;
+    }
+
+    fetchTotalDownloads()
+      .then(total => {
+        document.getElementById('total-downloads').innerText = `Total downloads: ${total.toLocaleString()}`;
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('total-downloads').innerText = 'Failed to fetch total downloads';
       });
   </script>
 </body>
