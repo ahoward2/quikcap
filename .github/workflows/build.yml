@@ -1,0 +1,49 @@
+name: Build and Publish Installer
+
+on:
+  workflow_dispatch: # Manual trigger
+  # You can keep push and pull_request if you want, or remove them
+  # push:
+  #   branches:
+  #     - main
+  # pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies with uv
+        run: uv sync
+
+      - name: Build executable with PyInstaller (inside uv env)
+        run: uv run ./build.sh
+
+      - name: Install Chocolatey
+        shell: pwsh
+        run: Set-ExecutionPolicy Bypass -Scope Process -Force; `
+          iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup -y
+
+      - name: Build installer with Inno Setup
+        run: ISCC.exe setup.iss
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: QuikCapInstaller
+          path: Output/QuikCapInstaller.exe
