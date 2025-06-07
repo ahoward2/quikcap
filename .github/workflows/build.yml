@@ -45,7 +45,7 @@ jobs:
         timeout-minutes: 10
 
       - name: Build installer with Inno Setup
-        run: ISCC.exe setup.is
+        run: ISCC.exe setup.iss
         timeout-minutes: 10
 
       - name: Upload artifact
