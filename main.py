@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QProgressBar,
 )
+from PySide6.QtGui import QIcon
 from contants import SettingsKeys, UIStrings, DefaultWindowSize, InstructionsBoxSize
 
 
@@ -29,6 +30,7 @@ class MainWindow(QWidget):
         self.settings = QSettings(UIStrings.ORG_NAME, UIStrings.APP_NAME)
 
         self.setWindowTitle(UIStrings.APP_NAME)
+        self.setWindowIcon(QIcon("assets/favicon.ico"))
         self.main_layout = QVBoxLayout()
         self.content_layout = QHBoxLayout()
         self.left_layout = QVBoxLayout()
