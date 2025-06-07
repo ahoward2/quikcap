@@ -1,6 +1,7 @@
 # main.py
 import sys
-from lib.transfer_worker import FileTransferWorker
+from lib.workers.transfer_worker import FileTransferWorker
+from lib.workers.delete_worker import FileDeleteWorker
 from PySide6.QtCore import QThread, QSettings
 from PySide6.QtWidgets import (
     QApplication,
@@ -65,7 +66,7 @@ class MainWindow(QWidget):
         self.camera_browse_btn.clicked.connect(self.browse_camera)
         self.target_browse_btn.clicked.connect(self.browse_target)
         self.import_button.clicked.connect(self.do_transfer)
-        # self.delete_button.clicked.connect(self.handle_delete_button_click)
+        self.delete_button.clicked.connect(self.do_delete)
 
     def switch_action_buttons(self, enable: bool):
         self.import_button.setEnabled(enable)
@@ -98,7 +99,7 @@ class MainWindow(QWidget):
 
     def do_transfer(self):
         if self.thread and self.thread.isRunning():
-            self.log_output.append(UIStrings.TRANSFER_ALREADY_RUNNING_MSG)
+            self.log_output.append(UIStrings.TASK_ALREADY_RUNNING_MSG)
             return
 
         camera_path = self.camera_input.text().strip()
@@ -110,7 +111,6 @@ class MainWindow(QWidget):
             return
 
         self.switch_action_buttons(False)
-        self.log_output.append(UIStrings.STARTING_TRANSFER_MSG)
 
         self.thread = QThread()
         self.worker = FileTransferWorker(camera_path, drafts_folder)
@@ -142,7 +142,51 @@ class MainWindow(QWidget):
     def on_transfer_error(self, error_msg):
         self.log_output.append(UIStrings.TRANSFER_ERROR_MSG.format(error_msg))
         self.progress_bar.setVisible(False)
-        QMessageBox.critical(self, "Transfer Error", error_msg)
+        QMessageBox.critical(self, "Transfer Error",
+                             UIStrings.TRANSFER_ERROR_MSG.format(error_msg))
+
+    def do_delete(self):
+        if self.thread and self.thread.isRunning():
+            self.log_output.append(UIStrings.TASK_ALREADY_RUNNING_MSG)
+            return
+
+        target_path = self.camera_input.text().strip()
+        if not target_path:
+            QMessageBox.warning(
+                self, "Warning", UIStrings.TARGET_FOLDER_NOT_SET_MSG)
+            return
+
+        self.switch_action_buttons(False)
+
+        self.thread = QThread()
+        self.worker = FileDeleteWorker(target_path)
+        self.worker.progress.connect(self.progress_bar.setValue)
+        self.progress_bar.setValue(0)
+        self.progress_bar.setVisible(True)
+
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.on_delete_complete)
+        self.worker.error.connect(self.on_delete_error)
+        self.worker.log.connect(self.log_output.append)
+
+        # Clean up
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.finished.connect(self.on_thread_finished)
+
+        self.thread.start()
+
+    def on_delete_complete(self, folder):
+        QMessageBox.information(self, UIStrings.DELETE_COMPLETE_MSG,
+                                UIStrings.FILES_DELETED_MSG.format(folder))
+
+    def on_delete_error(self, error_msg):
+        self.log_output.append(UIStrings.DELETE_ERROR_MSG.format(error_msg))
+        self.progress_bar.setVisible(False)
+        QMessageBox.critical(self, "Delete Error",
+                             UIStrings.DELETE_ERROR_MSG.format(error_msg))
 
     def on_thread_finished(self):
         self.progress_bar.setVisible(False)

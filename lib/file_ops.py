@@ -45,12 +45,25 @@ def move_files_from_filesystem(camera_folder, drafts_folder, progress_callback=N
     return target_folder
 
 
-def delete_files_from_filesystem(camera_folder):
-    # remove files from camera
+def delete_files_from_filesystem(camera_folder, progress_callback=None):
+    """
+    Delete all files from the camera folder.
+    """
+    # check if camera folder exists
+    if not os.path.exists(camera_folder):
+        raise FileNotFoundError(
+            f"Camera folder does not exist: {camera_folder}")
 
+    # delete all files in the camera folder
+    total_files = sum(len(files) for _, _, files in os.walk(camera_folder))
+    deleted_files = 0
     for root, dirs, files in os.walk(camera_folder):
         for file in files:
             src_file = os.path.join(root, file)
             os.remove(src_file)
+            deleted_files += 1
+            if progress_callback:
+                percent_complete = int((deleted_files / total_files) * 100)
+                progress_callback(percent_complete)
 
     return camera_folder
