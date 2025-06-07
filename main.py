@@ -11,7 +11,8 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QFileDialog,
     QTextEdit,
-    QMessageBox
+    QMessageBox,
+    QProgressBar,
 )
 
 
@@ -28,16 +29,18 @@ class MainWindow(QWidget):
         self.camera_input = QLineEdit()
         self.camera_browse_btn = QPushButton("Browse...")
         self.camera_input.setReadOnly(True)
-
         self.target_label = QLabel("Target Folder (Dump Directory):")
         self.target_input = QLineEdit()
         self.target_input.setReadOnly(True)
         self.target_browse_btn = QPushButton("Browse...")
         self.import_button = QPushButton("Import files")
         self.delete_button = QPushButton("Delete files")
-
         self.log_output = QTextEdit("Ready.\n")
         self.log_output.setReadOnly(True)
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(0, 100)
+        self.progress_bar.setVisible(False)
+        self.progress_bar.setValue(0)
 
         self.main_layout.addWidget(self.camera_label)
         self.main_layout.addWidget(self.camera_input)
@@ -49,6 +52,7 @@ class MainWindow(QWidget):
         self.main_layout.addWidget(self.delete_button)
         self.main_layout.addStretch()
         self.main_layout.addWidget(self.log_output)
+        self.main_layout.addWidget(self.progress_bar)
 
         self.setLayout(self.main_layout)
         self.resize(300, 100)
@@ -88,6 +92,11 @@ class MainWindow(QWidget):
 
         self.thread = QThread()
         self.worker = FileTransferWorker(camera_path, drafts_folder)
+        self.worker.progress.connect(self.progress_bar.setValue)
+        self.progress_bar.setValue(0)
+        self.progress_bar.setTextVisible(True)
+        self.progress_bar.setVisible(True)
+
         self.worker.moveToThread(self.thread)
 
         self.thread.started.connect(self.worker.run)
@@ -107,9 +116,12 @@ class MainWindow(QWidget):
         QMessageBox.information(self, "Success", f"Files moved to:\n{folder}")
 
     def on_transfer_error(self, error_msg):
+        self.log_output.append(f"Error: {error_msg}")
+        self.progress_bar.setVisible(False)
         QMessageBox.critical(self, "Transfer Error", error_msg)
 
     def on_thread_finished(self):
+        self.progress_bar.setVisible(False)
         self.import_button.setEnabled(True)
         self.thread = None
         self.worker = None
