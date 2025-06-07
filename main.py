@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QProgressBar,
 )
-from contants import SettingsKeys, UIStrings, DefaultWindowSize
+from contants import SettingsKeys, UIStrings, DefaultWindowSize, InstructionsBoxSize
 
 
 class MainWindow(QWidget):
@@ -52,6 +52,8 @@ class MainWindow(QWidget):
         self.progress_bar.setValue(0)
         self.instructions_box = QTextEdit()
         self.instructions_box.setReadOnly(True)
+        self.instructions_box.setMinimumHeight(InstructionsBoxSize.MIN_HEIGHT)
+        self.instructions_box.setMinimumWidth(InstructionsBoxSize.MIN_WIDTH)
 
         self.restore_settings()
 

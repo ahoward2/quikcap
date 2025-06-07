@@ -8,6 +8,11 @@ class DefaultWindowSize:
     HEIGHT = 400
 
 
+class InstructionsBoxSize:
+    MIN_WIDTH = 300
+    MIN_HEIGHT = 200
+
+
 class UIStrings:
     ORG_NAME = "ABHVR"
     APP_NAME = "QuikCap"
