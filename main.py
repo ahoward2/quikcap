@@ -67,6 +67,10 @@ class MainWindow(QWidget):
         self.import_button.clicked.connect(self.do_transfer)
         # self.delete_button.clicked.connect(self.handle_delete_button_click)
 
+    def switch_action_buttons(self, enable: bool):
+        self.import_button.setEnabled(enable)
+        self.delete_button.setEnabled(enable)
+
     def restore_settings(self):
         camera_path = self.settings.value(SettingsKeys.CAMERA_PATH, "")
         target_path = self.settings.value(SettingsKeys.TARGET_PATH, "")
@@ -93,7 +97,6 @@ class MainWindow(QWidget):
             self.settings.setValue(SettingsKeys.TARGET_PATH, folder)
 
     def do_transfer(self):
-        # Ignore if already running
         if self.thread and self.thread.isRunning():
             self.log_output.append(UIStrings.TRANSFER_ALREADY_RUNNING_MSG)
             return
@@ -106,7 +109,7 @@ class MainWindow(QWidget):
                 self, "Warning", UIStrings.TARGET_FOLDER_NOT_SET_MSG)
             return
 
-        self.import_button.setEnabled(False)
+        self.switch_action_buttons(False)
         self.log_output.append(UIStrings.STARTING_TRANSFER_MSG)
 
         self.thread = QThread()
@@ -122,6 +125,7 @@ class MainWindow(QWidget):
         self.worker.finished.connect(self.on_transfer_complete)
         self.worker.error.connect(self.on_transfer_error)
         self.worker.log.connect(self.log_output.append)
+
         # Clean up
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
@@ -133,7 +137,7 @@ class MainWindow(QWidget):
 
     def on_transfer_complete(self, folder):
         QMessageBox.information(
-            self, "Success", UIStrings.TRANSFER_COMPLETE_MSG.format(folder))
+            self, "Transfer Complete", UIStrings.FILES_MOVED_MSG.format(folder))
 
     def on_transfer_error(self, error_msg):
         self.log_output.append(UIStrings.TRANSFER_ERROR_MSG.format(error_msg))
@@ -142,7 +146,7 @@ class MainWindow(QWidget):
 
     def on_thread_finished(self):
         self.progress_bar.setVisible(False)
-        self.import_button.setEnabled(True)
+        self.switch_action_buttons(True)
         self.thread = None
         self.worker = None
 
