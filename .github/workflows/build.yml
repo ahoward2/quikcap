@@ -1,12 +1,11 @@
 name: Build and Publish Installer
 
 on:
-  workflow_dispatch: # Manual trigger
-  # You can keep push and pull_request if you want, or remove them
+  workflow_dispatch: # Manual trigger, can add tags or branches if desired
+  # Example to also trigger on tags:
   # push:
-  #   branches:
-  #     - main
-  # pull_request:
+  #   tags:
+  #     - 'v*.*.*'
 
 jobs:
   build:
@@ -23,27 +22,41 @@ jobs:
 
       - name: Install uv
         run: pip install uv
+        timeout-minutes: 5
 
       - name: Install dependencies with uv
         run: uv sync
+        timeout-minutes: 10
 
       - name: Build executable with PyInstaller (inside uv env)
         run: uv run ./build.bat
+        timeout-minutes: 15
 
       - name: Install Chocolatey
         shell: pwsh
-        run: Set-ExecutionPolicy Bypass -Scope Process -Force; `
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force
           iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+        timeout-minutes: 10
 
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup -y
+        timeout-minutes: 10
 
       - name: Build installer with Inno Setup
-        run: ISCC.exe setup.iss
+        run: '"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss'
+        timeout-minutes: 10
 
-      - name: Upload installer artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: QuikCapInstaller
           path: Output/QuikCapInstaller.exe
+
+      - name: Create Release and Upload Installer
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./Output/QuikCapInstaller.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
