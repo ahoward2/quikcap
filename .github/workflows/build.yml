@@ -28,7 +28,7 @@ jobs:
         run: uv sync
 
       - name: Build executable with PyInstaller (inside uv env)
-        run: uv run ./build.sh
+        run: uv run ./build.bat
 
       - name: Install Chocolatey
         shell: pwsh
