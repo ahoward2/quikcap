@@ -32,25 +32,29 @@ jobs:
         run: |
           bump="${{ github.event.inputs.bump_type }}"
           latest="${{ steps.get_tag.outputs.latest_tag }}"
-          echo "Latest tag is $latest"
+          echo "Latest tag is: $latest"
 
-          # Strip leading 'v' and parse version
-          version="${latest#v}"
-          IFS='.' read -r major minor patch <<< "$version"
+          if [[ "$latest" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            major="${BASH_REMATCH[1]}"
+            minor="${BASH_REMATCH[2]}"
+            patch="${BASH_REMATCH[3]}"
+          else
+            echo "Invalid tag format: $latest"
+            echo "Using fallback version 0.0.0"
+            major=0; minor=0; patch=0
+          fi
 
           case "$bump" in
-            major)
-              major=$((major + 1)); minor=0; patch=0;;
-            minor)
-              minor=$((minor + 1)); patch=0;;
-            patch)
-              patch=$((patch + 1));;
-            *)
-              echo "Invalid bump type: $bump"; exit 1;;
+            major) major=$((major + 1)); minor=0; patch=0;;
+            minor) minor=$((minor + 1)); patch=0;;
+            patch) patch=$((patch + 1));;
+            *) echo "Invalid bump type: $bump"; exit 1;;
           esac
 
           new_tag="v$major.$minor.$patch"
+          echo "Next tag will be: $new_tag"
           echo "next_tag=$new_tag" >> $GITHUB_OUTPUT
+
 
       - name: Check if tag already exists
         id: check_tag
