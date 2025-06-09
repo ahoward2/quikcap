@@ -153,7 +153,6 @@ class MainWindow(QWidget):
         self.worker.error.connect(self.on_transfer_error)
         self.worker.log.connect(self.log_output.append)
 
-        # Clean up
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
