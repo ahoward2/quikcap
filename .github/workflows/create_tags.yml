@@ -24,13 +24,13 @@ jobs:
         id: get_tag
         run: |
           latest_tag=$(git describe --tags --abbrev=0 || echo "v0.0.0")
-          echo "::set-output name=latest_tag::$latest_tag"
+          echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
 
       - name: Calculate next tag
         id: next_tag
         run: |
           bump="${{ github.event.inputs.bump_type }}"
-          latest=${{ steps.get_tag.outputs.latest_tag }}
+          latest="${{ steps.get_tag.outputs.latest_tag }}"
           echo "Latest tag is $latest"
           IFS='.' read -r major minor patch <<< "${latest#v}"
 
@@ -54,8 +54,7 @@ jobs:
           esac
 
           next="v$major.$minor.$patch"
-          echo "Next tag is $next"
-          echo "::set-output name=next_tag::$next"
+          echo "next_tag=$next" >> $GITHUB_OUTPUT
 
       - name: Create and push tag
         run: |
