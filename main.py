@@ -1,10 +1,12 @@
 # main.py
 import sys
+from typing import List
 from lib.workers.transfer_worker import FileTransferWorker
 from lib.workers.delete_worker import FileDeleteWorker
 from lib.build_helpers import resource_path
 from lib.file_ops import read_files_from_filesystem
-from PySide6.QtCore import Qt, QThread, QSettings
+from lib.file_ops import FileObject
+from PySide6.QtCore import QThread, QSettings
 from PySide6.QtWidgets import (
     QApplication,
     QFrame,
@@ -18,9 +20,7 @@ from PySide6.QtWidgets import (
     QTextEdit,
     QMessageBox,
     QProgressBar,
-    QTableWidget,
     QTableWidgetItem,
-    QHeaderView
 )
 from PySide6.QtGui import QIcon
 from widgets.file_table import FileTable
@@ -169,7 +169,7 @@ class MainWindow(QWidget):
                 f"Error reading files from camera folder: {e}")
             self.set_source_preview_table([])
 
-    def set_target_preview_table(self, files):
+    def set_target_preview_table(self, files: List[FileObject]):
         self.target_preview_table.clear_files()
 
         if not files:
@@ -182,10 +182,9 @@ class MainWindow(QWidget):
         self.target_preview_table.setEnabled(True)
 
         for row, file in enumerate(files):
-            self.target_preview_table.add_file(row=row,
-                                               file_name=file.name, size=file.size)
+            self.target_preview_table.add_file(row=row, file=file)
 
-    def set_source_preview_table(self, files):
+    def set_source_preview_table(self, files: List[FileObject]):
         self.source_preview_table.clear_files()
 
         if not files:
@@ -198,8 +197,7 @@ class MainWindow(QWidget):
         self.source_preview_table.setEnabled(True)
 
         for row, file in enumerate(files):
-            self.source_preview_table.add_file(row=row,
-                                               file_name=file.name, size=file.size)
+            self.source_preview_table.add_file(row=row, file=file)
 
     def create_horizontal_divider(self):
         divider = QFrame()
