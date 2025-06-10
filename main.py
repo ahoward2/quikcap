@@ -46,15 +46,22 @@ class MainWindow(QWidget):
         self.bottom_left_layout = QVBoxLayout()
         self.bottom_right_layout = QVBoxLayout()
 
-        # left layout widgets
         self.camera_label = QLabel(UIStrings.CAMERA_PATH_LABEL)
+        self.camera_input_row = QHBoxLayout()
         self.camera_input = QLineEdit()
         self.camera_browse_btn = QPushButton(UIStrings.BROWSE_BUTTON_LABEL)
         self.camera_input.setReadOnly(True)
+        self.camera_input_row.addWidget(self.camera_browse_btn)
+        self.camera_input_row.addWidget(self.camera_input)
+
         self.target_label = QLabel(UIStrings.TARGET_PATH_LABEL)
+        self.target_input_row = QHBoxLayout()
         self.target_input = QLineEdit()
         self.target_input.setReadOnly(True)
         self.target_browse_btn = QPushButton(UIStrings.BROWSE_BUTTON_LABEL)
+        self.target_input_row.addWidget(self.target_browse_btn)
+        self.target_input_row.addWidget(self.target_input)
+
         self.actions_label = QLabel(UIStrings.ACTIONS_LABEL)
         self.import_button = QPushButton(UIStrings.IMPORT_BUTTON_LABEL)
         self.delete_button = QPushButton(UIStrings.DELETE_BUTTON_LABEL)
@@ -63,14 +70,11 @@ class MainWindow(QWidget):
         self.source_preview_table.setMinimumHeight(200)
         self.source_preview_table.setMinimumWidth(300)
         self.source_preview_table.setEnabled(False)
-        self.source_preview_table_label = QLabel(
-            "Source Files (Camera Preview)")
 
         self.target_preview_table = FileTable()
         self.target_preview_table.setMinimumHeight(200)
         self.target_preview_table.setMinimumWidth(300)
         self.target_preview_table.setEnabled(False)
-        self.target_preview_table_label = QLabel("Target Files (Dump Preview)")
 
         # right layout widgets (not right layout yet)
         self.instructions_box = QTextEdit()
@@ -88,24 +92,22 @@ class MainWindow(QWidget):
         self.restore_settings()
 
         # Assemble left layout
-        self.left_content_layout.addWidget(self.camera_label)
-        self.left_content_layout.addWidget(self.camera_input)
-        self.left_content_layout.addWidget(self.camera_browse_btn)
-        self.left_content_layout.addWidget(self.create_horizontal_divider())
-        self.left_content_layout.addWidget(self.target_label)
-        self.left_content_layout.addWidget(self.target_input)
-        self.left_content_layout.addWidget(self.target_browse_btn)
-        self.left_content_layout.addWidget(self.create_horizontal_divider())
         self.left_content_layout.addWidget(self.actions_label)
+        self.left_content_layout.addWidget(self.create_horizontal_divider())
         self.left_content_layout.addWidget(self.import_button)
         self.left_content_layout.addWidget(self.delete_button)
-
+        self.left_content_layout.addStretch()
         # Assemble center layout
-        self.center_content_layout.addWidget(self.source_preview_table_label)
+
+        self.center_content_layout.addWidget(self.camera_label)
+        self.center_content_layout.addWidget(self.create_horizontal_divider())
+        self.center_content_layout.addLayout(self.camera_input_row)
         self.center_content_layout.addWidget(self.source_preview_table)
 
         # Assemble right layout
-        self.right_content_layout.addWidget(self.target_preview_table_label)
+        self.right_content_layout.addWidget(self.target_label)
+        self.right_content_layout.addWidget(self.create_horizontal_divider())
+        self.right_content_layout.addLayout(self.target_input_row)
         self.right_content_layout.addWidget(self.target_preview_table)
 
         # Assemble bottom left layout
