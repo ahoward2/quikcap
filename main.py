@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
     QHeaderView
 )
 from PySide6.QtGui import QIcon
+from widgets.file_table import FileTable
 from contants import SettingsKeys, UIStrings, DefaultWindowSize, InstructionsBoxSize
 
 
@@ -38,8 +39,12 @@ class MainWindow(QWidget):
         self.setWindowIcon(QIcon(resource_path("assets/favicon.ico")))
         self.main_layout = QVBoxLayout()
         self.content_layout = QHBoxLayout()
-        self.left_layout = QVBoxLayout()
-        self.center_layout = QVBoxLayout()
+        self.left_content_layout = QVBoxLayout()
+        self.center_content_layout = QVBoxLayout()
+        self.right_content_layout = QVBoxLayout()
+        self.bottom_layout = QHBoxLayout()
+        self.bottom_left_layout = QVBoxLayout()
+        self.bottom_right_layout = QVBoxLayout()
 
         # left layout widgets
         self.camera_label = QLabel(UIStrings.CAMERA_PATH_LABEL)
@@ -54,10 +59,18 @@ class MainWindow(QWidget):
         self.import_button = QPushButton(UIStrings.IMPORT_BUTTON_LABEL)
         self.delete_button = QPushButton(UIStrings.DELETE_BUTTON_LABEL)
 
-        self.preview_list = QTableWidget()
-        self.preview_list.setMinimumHeight(200)
-        self.preview_list.setMinimumWidth(300)
-        self.preview_list.setEnabled(False)
+        self.source_preview_table = FileTable()
+        self.source_preview_table.setMinimumHeight(200)
+        self.source_preview_table.setMinimumWidth(300)
+        self.source_preview_table.setEnabled(False)
+        self.source_preview_table_label = QLabel(
+            "Source Files (Camera Preview)")
+
+        self.target_preview_table = FileTable()
+        self.target_preview_table.setMinimumHeight(200)
+        self.target_preview_table.setMinimumWidth(300)
+        self.target_preview_table.setEnabled(False)
+        self.target_preview_table_label = QLabel("Target Files (Dump Preview)")
 
         # right layout widgets (not right layout yet)
         self.instructions_box = QTextEdit()
@@ -74,29 +87,49 @@ class MainWindow(QWidget):
         self.progress_bar.setValue(0)
         self.restore_settings()
 
-        self.left_layout.addWidget(self.camera_label)
-        self.left_layout.addWidget(self.camera_input)
-        self.left_layout.addWidget(self.camera_browse_btn)
-        self.left_layout.addWidget(self.create_horizontal_divider())
-        self.left_layout.addWidget(self.target_label)
-        self.left_layout.addWidget(self.target_input)
-        self.left_layout.addWidget(self.target_browse_btn)
-        self.left_layout.addWidget(self.create_horizontal_divider())
-        self.left_layout.addWidget(self.actions_label)
-        self.left_layout.addWidget(self.import_button)
-        self.left_layout.addWidget(self.delete_button)
+        # Assemble left layout
+        self.left_content_layout.addWidget(self.camera_label)
+        self.left_content_layout.addWidget(self.camera_input)
+        self.left_content_layout.addWidget(self.camera_browse_btn)
+        self.left_content_layout.addWidget(self.create_horizontal_divider())
+        self.left_content_layout.addWidget(self.target_label)
+        self.left_content_layout.addWidget(self.target_input)
+        self.left_content_layout.addWidget(self.target_browse_btn)
+        self.left_content_layout.addWidget(self.create_horizontal_divider())
+        self.left_content_layout.addWidget(self.actions_label)
+        self.left_content_layout.addWidget(self.import_button)
+        self.left_content_layout.addWidget(self.delete_button)
 
-        self.center_layout.addWidget(self.preview_list)
+        # Assemble center layout
+        self.center_content_layout.addWidget(self.source_preview_table_label)
+        self.center_content_layout.addWidget(self.source_preview_table)
 
+        # Assemble right layout
+        self.right_content_layout.addWidget(self.target_preview_table_label)
+        self.right_content_layout.addWidget(self.target_preview_table)
+
+        # Assemble bottom left layout
+        self.bottom_left_layout.addWidget(self.log_output)
+        self.bottom_left_layout.addWidget(self.progress_bar)
+
+        # Assemble bottom right layout
+        self.bottom_right_layout.addWidget(self.instructions_box)
+
+        # Assemble bottom layout
+        self.bottom_layout.addLayout(self.bottom_left_layout, stretch=5)
+        self.bottom_layout.addLayout(self.bottom_right_layout, stretch=3)
+
+        # Assemble layouts
         self.setLayout(self.main_layout)
-        self.content_layout.addLayout(self.left_layout, stretch=2)
-        self.content_layout.addLayout(self.center_layout, stretch=3)
-        self.content_layout.addWidget(self.instructions_box, stretch=3)
+
+        # Assemble content layout
+        self.content_layout.addLayout(self.left_content_layout, stretch=2)
+        self.content_layout.addLayout(self.center_content_layout, stretch=3)
+        self.content_layout.addLayout(self.right_content_layout, stretch=3)
 
         self.main_layout.addLayout(self.content_layout)
+        self.main_layout.addLayout(self.bottom_layout)
 
-        self.main_layout.addWidget(self.log_output)
-        self.main_layout.addWidget(self.progress_bar)
         self.resize(DefaultWindowSize.WIDTH, DefaultWindowSize.HEIGHT)
 
         self.camera_browse_btn.clicked.connect(self.browse_camera)
@@ -105,45 +138,68 @@ class MainWindow(QWidget):
         self.delete_button.clicked.connect(self.do_delete)
 
         self.load_instructions()
+        self.update_source_preview_table()
+        self.update_target_preview_table()
+
+    def update_target_preview_table(self):
+        target_path = self.target_input.text().strip()
+        if not target_path:
+            self.set_target_preview_table([])
+            return
+
         try:
-            files = read_files_from_filesystem(
-                self.camera_input.text().strip())
-            self.set_preview_list(files)
+            files = read_files_from_filesystem(target_path)
+            self.set_target_preview_table(files)
+        except FileNotFoundError as e:
+            self.log_output.append(
+                f"Error reading files from target folder: {e}")
+            self.set_target_preview_table([])
+
+    def update_source_preview_table(self):
+        camera_path = self.camera_input.text().strip()
+        if not camera_path:
+            self.set_source_preview_table([])
+            return
+
+        try:
+            files = read_files_from_filesystem(camera_path)
+            self.set_source_preview_table(files)
         except FileNotFoundError as e:
             self.log_output.append(
                 f"Error reading files from camera folder: {e}")
-            self.set_preview_list([])
+            self.set_source_preview_table([])
 
-    def set_preview_list(self, files):
-        self.preview_list.clear()
-        self.preview_list.setColumnCount(2)
-        self.preview_list.setHorizontalHeaderItem(0, QTableWidgetItem("Files"))
-        self.preview_list.setHorizontalHeaderItem(
-            1, QTableWidgetItem("Size"))
-        self.preview_list.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.preview_list.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.ResizeToContents)
-        self.preview_list.setRowCount(0)
+    def set_target_preview_table(self, files):
+        self.target_preview_table.clear_files()
 
         if not files:
-            self.preview_list.setRowCount(1)
+            self.target_preview_table.setRowCount(1)
             newItem = QTableWidgetItem(UIStrings.FILES_NOT_FOUND_MSG)
-            self.preview_list.setItem(0, 0, newItem)
-            self.preview_list.setEnabled(False)
+            self.target_preview_table.setItem(0, 0, newItem)
+            self.target_preview_table.setEnabled(False)
             return
 
-        self.preview_list.setEnabled(True)
-        self.preview_list.setRowCount(len(files))
+        self.target_preview_table.setEnabled(True)
 
         for row, file in enumerate(files):
-            name = QTableWidgetItem(file.name)
-            name.setFlags(name.flags() & ~Qt.ItemIsEditable)
-            size = QTableWidgetItem(str(file.size))
-            size.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            size.setFlags(size.flags() & ~Qt.ItemIsEditable)
-            name.setToolTip(file.path)
-            self.preview_list.setItem(row, 0, name)
-            self.preview_list.setItem(row, 1, size)
+            self.target_preview_table.add_file(row=row,
+                                               file_name=file.name, size=file.size)
+
+    def set_source_preview_table(self, files):
+        self.source_preview_table.clear_files()
+
+        if not files:
+            self.source_preview_table.setRowCount(1)
+            newItem = QTableWidgetItem(UIStrings.FILES_NOT_FOUND_MSG)
+            self.source_preview_table.setItem(0, 0, newItem)
+            self.source_preview_table.setEnabled(False)
+            return
+
+        self.source_preview_table.setEnabled(True)
+
+        for row, file in enumerate(files):
+            self.source_preview_table.add_file(row=row,
+                                               file_name=file.name, size=file.size)
 
     def create_horizontal_divider(self):
         divider = QFrame()
@@ -171,12 +227,7 @@ class MainWindow(QWidget):
         if folder:
             self.camera_input.setText(folder)
             self.settings.setValue(SettingsKeys.CAMERA_PATH, folder)
-            try:
-                files = read_files_from_filesystem(folder)
-                self.set_preview_list(files)
-            except FileNotFoundError as e:
-                self.log_output.append(
-                    f"Error reading files from camera folder: {e}")
+            self.update_source_preview_table()
 
     def browse_target(self):
         initial_path = self.target_input.text().strip() or ""
@@ -185,6 +236,7 @@ class MainWindow(QWidget):
         if folder:
             self.target_input.setText(folder)
             self.settings.setValue(SettingsKeys.TARGET_PATH, folder)
+            self.update_target_preview_table()
 
     def do_transfer(self):
         if self.thread and self.thread.isRunning():
@@ -224,6 +276,8 @@ class MainWindow(QWidget):
         self.thread.start()
 
     def on_transfer_complete(self, folder):
+        self.update_target_preview_table()
+        self.update_source_preview_table()
         QMessageBox.information(
             self, "Transfer Complete", UIStrings.FILES_MOVED_MSG.format(folder))
 
@@ -267,6 +321,7 @@ class MainWindow(QWidget):
         self.thread.start()
 
     def on_delete_complete(self, folder):
+        self.update_source_preview_table()
         QMessageBox.information(self, "Deletion Complete",
                                 UIStrings.FILES_DELETED_MSG.format(folder))
 
