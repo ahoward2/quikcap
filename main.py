@@ -3,7 +3,8 @@ import sys
 from lib.workers.transfer_worker import FileTransferWorker
 from lib.workers.delete_worker import FileDeleteWorker
 from lib.build_helpers import resource_path
-from PySide6.QtCore import QThread, QSettings
+from lib.file_ops import read_files_from_filesystem
+from PySide6.QtCore import Qt, QThread, QSettings
 from PySide6.QtWidgets import (
     QApplication,
     QFrame,
@@ -17,6 +18,9 @@ from PySide6.QtWidgets import (
     QTextEdit,
     QMessageBox,
     QProgressBar,
+    QTableWidget,
+    QTableWidgetItem,
+    QHeaderView
 )
 from PySide6.QtGui import QIcon
 from contants import SettingsKeys, UIStrings, DefaultWindowSize, InstructionsBoxSize
@@ -35,7 +39,9 @@ class MainWindow(QWidget):
         self.main_layout = QVBoxLayout()
         self.content_layout = QHBoxLayout()
         self.left_layout = QVBoxLayout()
+        self.center_layout = QVBoxLayout()
 
+        # left layout widgets
         self.camera_label = QLabel(UIStrings.CAMERA_PATH_LABEL)
         self.camera_input = QLineEdit()
         self.camera_browse_btn = QPushButton(UIStrings.BROWSE_BUTTON_LABEL)
@@ -47,17 +53,25 @@ class MainWindow(QWidget):
         self.actions_label = QLabel(UIStrings.ACTIONS_LABEL)
         self.import_button = QPushButton(UIStrings.IMPORT_BUTTON_LABEL)
         self.delete_button = QPushButton(UIStrings.DELETE_BUTTON_LABEL)
+
+        self.preview_list = QTableWidget()
+        self.preview_list.setMinimumHeight(200)
+        self.preview_list.setMinimumWidth(300)
+        self.preview_list.setEnabled(False)
+
+        # right layout widgets (not right layout yet)
+        self.instructions_box = QTextEdit()
+        self.instructions_box.setReadOnly(True)
+        self.instructions_box.setMinimumHeight(InstructionsBoxSize.MIN_HEIGHT)
+        self.instructions_box.setMinimumWidth(InstructionsBoxSize.MIN_WIDTH)
+
+        # bottom layout widgets
         self.log_output = QTextEdit(UIStrings.READY_MSG)
         self.log_output.setReadOnly(True)
         self.progress_bar = QProgressBar()
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setVisible(False)
         self.progress_bar.setValue(0)
-        self.instructions_box = QTextEdit()
-        self.instructions_box.setReadOnly(True)
-        self.instructions_box.setMinimumHeight(InstructionsBoxSize.MIN_HEIGHT)
-        self.instructions_box.setMinimumWidth(InstructionsBoxSize.MIN_WIDTH)
-
         self.restore_settings()
 
         self.left_layout.addWidget(self.camera_label)
@@ -72,8 +86,11 @@ class MainWindow(QWidget):
         self.left_layout.addWidget(self.import_button)
         self.left_layout.addWidget(self.delete_button)
 
+        self.center_layout.addWidget(self.preview_list)
+
         self.setLayout(self.main_layout)
         self.content_layout.addLayout(self.left_layout, stretch=2)
+        self.content_layout.addLayout(self.center_layout, stretch=3)
         self.content_layout.addWidget(self.instructions_box, stretch=3)
 
         self.main_layout.addLayout(self.content_layout)
@@ -88,6 +105,45 @@ class MainWindow(QWidget):
         self.delete_button.clicked.connect(self.do_delete)
 
         self.load_instructions()
+        try:
+            files = read_files_from_filesystem(
+                self.camera_input.text().strip())
+            self.set_preview_list(files)
+        except FileNotFoundError as e:
+            self.log_output.append(
+                f"Error reading files from camera folder: {e}")
+            self.set_preview_list([])
+
+    def set_preview_list(self, files):
+        self.preview_list.clear()
+        self.preview_list.setColumnCount(2)
+        self.preview_list.setHorizontalHeaderItem(0, QTableWidgetItem("Files"))
+        self.preview_list.setHorizontalHeaderItem(
+            1, QTableWidgetItem("Size"))
+        self.preview_list.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.preview_list.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.ResizeToContents)
+        self.preview_list.setRowCount(0)
+
+        if not files:
+            self.preview_list.setRowCount(1)
+            newItem = QTableWidgetItem(UIStrings.FILES_NOT_FOUND_MSG)
+            self.preview_list.setItem(0, 0, newItem)
+            self.preview_list.setEnabled(False)
+            return
+
+        self.preview_list.setEnabled(True)
+        self.preview_list.setRowCount(len(files))
+
+        for row, file in enumerate(files):
+            name = QTableWidgetItem(file.name)
+            name.setFlags(name.flags() & ~Qt.ItemIsEditable)
+            size = QTableWidgetItem(str(file.size))
+            size.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            size.setFlags(size.flags() & ~Qt.ItemIsEditable)
+            name.setToolTip(file.path)
+            self.preview_list.setItem(row, 0, name)
+            self.preview_list.setItem(row, 1, size)
 
     def create_horizontal_divider(self):
         divider = QFrame()
@@ -115,6 +171,12 @@ class MainWindow(QWidget):
         if folder:
             self.camera_input.setText(folder)
             self.settings.setValue(SettingsKeys.CAMERA_PATH, folder)
+            try:
+                files = read_files_from_filesystem(folder)
+                self.set_preview_list(files)
+            except FileNotFoundError as e:
+                self.log_output.append(
+                    f"Error reading files from camera folder: {e}")
 
     def browse_target(self):
         initial_path = self.target_input.text().strip() or ""

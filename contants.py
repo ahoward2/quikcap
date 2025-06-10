@@ -4,8 +4,8 @@ class SettingsKeys:
 
 
 class DefaultWindowSize:
-    WIDTH = 600
-    HEIGHT = 400
+    WIDTH = 1000
+    HEIGHT = 500
 
 
 class InstructionsBoxSize:
