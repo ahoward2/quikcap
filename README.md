@@ -2,14 +2,16 @@
 
 <!-- vscode-markdown-toc -->
 
-- 1. [Local Development](#LocalDevelopment)
-  - 1.1. [Global Dependencies](#GlobalDependencies)
-  - 1.2. [Repository Setup](#RepositorySetup)
-  - 1.3. [Running the app](#Runningtheapp)
-  - 1.4. [Build](#Build)
-    - 1.4.1. [Building the app .exe](#Buildingtheapp.exe)
-    - 1.4.2. [Building Inno Installer Executable (Windows only)](#BuildingInnoInstallerExecutableWindowsonly)
-- 2. [ SDLC](#SDLC)
+- 1. [Download](#Download)
+  - 1.1. [Supported platforms](#Supportedplatforms)
+- 2. [Local Development](#LocalDevelopment)
+  - 2.1. [Global Dependencies](#GlobalDependencies)
+  - 2.2. [Repository Setup](#RepositorySetup)
+  - 2.3. [Running the app](#Runningtheapp)
+  - 2.4. [Build](#Build)
+    - 2.4.1. [Building the app .exe](#Buildingtheapp.exe)
+    - 2.4.2. [Building Inno Installer Executable (Windows only)](#BuildingInnoInstallerExecutableWindowsonly)
+- 3. [ SDLC](#SDLC)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -21,9 +23,19 @@
 
 A light-weight camera dumping application.
 
-## 1. <a name='LocalDevelopment'></a>Local Development
+## 1. <a name='Download'></a>Download
 
-### 1.1. <a name='GlobalDependencies'></a>Global Dependencies
+Download the [latest version](https://ahoward2.github.io/quikcap/).
+
+### 1.1. <a name='Supportedplatforms'></a>Supported platforms
+
+- Windows ✅
+- Mac 🔜
+- Linux 🔜
+
+## 2. <a name='LocalDevelopment'></a>Local Development
+
+### 2.1. <a name='GlobalDependencies'></a>Global Dependencies
 
 **UV**
 
@@ -41,7 +53,7 @@ pip install -U pyinstaller
 
 - Install from https://jrsoftware.org/isdl.php
 
-### 1.2. <a name='RepositorySetup'></a>Repository Setup
+### 2.2. <a name='RepositorySetup'></a>Repository Setup
 
 1. Create virtual environment with `uv`.
 
@@ -70,7 +82,7 @@ source .venv\Scripts\activate
 uv sync
 ```
 
-### 1.3. <a name='Runningtheapp'></a>Running the app
+### 2.3. <a name='Runningtheapp'></a>Running the app
 
 Recommended to run the application with a debugger.
 
@@ -78,9 +90,9 @@ Recommended to run the application with a debugger.
 
 1. Run the debugger with `f5` key or in VSC UI.
 
-### 1.4. <a name='Build'></a>Build
+### 2.4. <a name='Build'></a>Build
 
-#### 1.4.1. <a name='Buildingtheapp.exe'></a>Building the app .exe
+#### 2.4.1. <a name='Buildingtheapp.exe'></a>Building the app .exe
 
 **Mac / Linux**
 
@@ -95,12 +107,12 @@ chmod +x build.sh
 ./build.bat
 ```
 
-#### 1.4.2. <a name='BuildingInnoInstallerExecutableWindowsonly'></a>Building Inno Installer Executable (Windows only)
+#### 2.4.2. <a name='BuildingInnoInstallerExecutableWindowsonly'></a>Building Inno Installer Executable (Windows only)
 
 1. Open the Inno Compiler Application.
 2. Select `setup.iss` and execute script.
 
-## 2. <a name='SDLC'></a> SDLC
+## 3. <a name='SDLC'></a> SDLC
 
 1. Make application changes.
 2. Tag version for release -> [Create Tags](./.github/workflows/create_tags.yml).
