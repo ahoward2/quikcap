@@ -7,9 +7,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Log Tags
-        run: echo ${{ github.ref_name }}
-
       - name: Checkout repo at tag
         uses: actions/checkout@v4
         with:
