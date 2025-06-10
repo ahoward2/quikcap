@@ -1,94 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="QuikCap - Instantly dump footage from your camera to clean draft folders. No friction. Just flow."
+    />
+    <meta name="author" content="ahoward2" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <title>QuikCap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        background: radial-gradient(ellipse at top, #3b0764, #1e1b4b);
+      }
+    </style>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description"
-    content="QuikCap - Instantly dump footage from your camera to clean draft folders. No friction. Just flow." />
-  <meta name="author" content="ahoward2" />
-  <link rel="icon" href="favicon.ico" type="image/x-icon" />
-  <title>QuikCap</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      background: radial-gradient(ellipse at top, #3b0764, #1e1b4b);
-    }
-  </style>
-</head>
+  <body class="text-white min-h-screen flex items-center justify-center px-4">
+    <div
+      class="bg-white/5 backdrop-blur-sm shadow-xl rounded-2xl p-10 max-w-md w-full border border-white/10 text-center"
+    >
+      <!-- Logo -->
+      <img
+        src="logo.png"
+        alt="QuikCap Logo"
+        class="mx-auto mb-6 w-24 h-24 object-contain"
+      />
 
-<body class="text-white min-h-screen flex items-center justify-center px-4">
-  <div
-    class="bg-white/5 backdrop-blur-sm shadow-xl rounded-2xl p-10 max-w-md w-full border border-white/10 text-center">
+      <h1 class="text-4xl font-extrabold text-purple-300 mb-2 tracking-tight">
+        QuikCap
+      </h1>
+      <p class="text-sm text-purple-100 mb-6">
+        Fast and simple camera footage transfer.
+      </p>
+      <a
+        href="https://github.com/ahoward2/quikcap/releases/latest/download/QuikCapInstaller.exe"
+        class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-lg"
+      >
+        Download Latest Version
+      </a>
 
-    <!-- Logo -->
-    <img src="logo.png" alt="QuikCap Logo" class="mx-auto mb-6 w-24 h-24 object-contain" />
+      <!-- Unsigned app warning -->
+      <p
+        class="mt-4 text-xs text-yellow-400 bg-yellow-900 bg-opacity-20 rounded-md p-3"
+      >
+        ⚠️ <strong>Important:</strong> QuikCap is currently unsigned. Windows
+        may display a security warning when launching the app. This is normal
+        and safe — we’re working on obtaining a signing certificate soon.
+      </p>
 
-    <h1 class="text-4xl font-extrabold text-purple-300 mb-2 tracking-tight">QuikCap</h1>
-    <p class="text-sm text-purple-100 mb-6">
-      Instantly dump footage from your camera to clean draft folders. No friction. Just flow.
-    </p>
-    <a href="https://github.com/ahoward2/quikcap/releases/latest/download/QuikCapInstaller.exe"
-      class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-lg">
-      Download Latest Installer
-    </a>
-    <p id="version" class="text-xs text-purple-200 mt-4">Windows only — fetching version…</p>
-    <p id="total-downloads" class="text-xs text-purple-200 mt-1">Loading total downloads...</p>
+      <p id="version" class="text-xs text-purple-200 mt-4">
+        Windows only — fetching version…
+      </p>
+      <p id="total-downloads" class="text-xs text-purple-200 mt-1">
+        Loading total downloads...
+      </p>
 
-    <!-- Credit -->
-    <p class="mt-8 text-xs text-purple-400 opacity-70">© 2025 Austin Howard</p>
-  </div>
+      <!-- Credit -->
+      <p class="mt-8 text-xs text-purple-400 opacity-70">
+        © 2025 Austin Howard
+      </p>
+    </div>
 
-  <script>
-    fetch('https://api.github.com/repos/ahoward2/quikcap/releases/latest')
-      .then(res => res.json())
-      .then(data => {
-        const tag = data.tag_name || 'unknown';
-        document.getElementById('version').innerText = `Windows only — ${tag}`;
-      })
-      .catch(() => {
-        document.getElementById('version').innerText = 'Windows only — version unknown';
-      });
-
-    async function fetchTotalDownloads() {
-      const owner = 'ahoward2';
-      const repo = 'quikcap';
-      let page = 1;
-      let totalDownloads = 0;
-      const perPage = 100;
-
-      while (true) {
-        const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases?per_page=${perPage}&page=${page}`, {
-          headers: { 'Accept': 'application/vnd.github+json' }
+    <script>
+      fetch("https://api.github.com/repos/ahoward2/quikcap/releases/latest")
+        .then((res) => res.json())
+        .then((data) => {
+          const tag = data.tag_name || "unknown";
+          document.getElementById(
+            "version"
+          ).innerText = `Windows only — ${tag}`;
+        })
+        .catch(() => {
+          document.getElementById("version").innerText =
+            "Windows only — version unknown";
         });
-        const releases = await response.json();
 
-        if (!Array.isArray(releases) || releases.length === 0) break;
+      async function fetchTotalDownloads() {
+        const owner = "ahoward2";
+        const repo = "quikcap";
+        let page = 1;
+        let totalDownloads = 0;
+        const perPage = 100;
 
-        releases.forEach(release => {
-          if (release.assets && release.assets.length) {
-            release.assets.forEach(asset => {
-              totalDownloads += asset.download_count;
-            });
-          }
-        });
+        while (true) {
+          const response = await fetch(
+            `https://api.github.com/repos/${owner}/${repo}/releases?per_page=${perPage}&page=${page}`,
+            {
+              headers: { Accept: "application/vnd.github+json" },
+            }
+          );
+          const releases = await response.json();
 
-        if (releases.length < perPage) break; // last page
-        page++;
+          if (!Array.isArray(releases) || releases.length === 0) break;
+
+          releases.forEach((release) => {
+            if (release.assets && release.assets.length) {
+              release.assets.forEach((asset) => {
+                totalDownloads += asset.download_count;
+              });
+            }
+          });
+
+          if (releases.length < perPage) break; // last page
+          page++;
+        }
+
+        return totalDownloads;
       }
 
-      return totalDownloads;
-    }
-
-    fetchTotalDownloads()
-      .then(total => {
-        document.getElementById('total-downloads').innerText = `Total downloads: ${total.toLocaleString()}`;
-      })
-      .catch(err => {
-        console.error(err);
-        document.getElementById('total-downloads').innerText = 'Failed to fetch total downloads';
-      });
-  </script>
-</body>
-
+      fetchTotalDownloads()
+        .then((total) => {
+          document.getElementById(
+            "total-downloads"
+          ).innerText = `Total downloads: ${total.toLocaleString()}`;
+        })
+        .catch((err) => {
+          console.error(err);
+          document.getElementById("total-downloads").innerText =
+            "Failed to fetch total downloads";
+        });
+    </script>
+  </body>
 </html>

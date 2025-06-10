@@ -21,7 +21,7 @@
 
 # QuikCap
 
-A light-weight camera dumping application.
+Fast and simple camera footage transfer.
 
 ## 1. <a name='Download'></a>Download
 
