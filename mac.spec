@@ -1,8 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-import sys
-import os
-
 a = Analysis(
     ['main.py'],
     pathex=['.'],

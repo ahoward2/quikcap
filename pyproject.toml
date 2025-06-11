@@ -1,4 +1,4 @@
 [project]
-name = "my-desktop-app"
+name = "quikcap"
 version = "0.1.0"
-dependencies = ["pyside6", "pyinstaller"]
+dependencies = ["pyside6"]

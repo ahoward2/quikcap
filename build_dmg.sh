@@ -8,7 +8,7 @@ DMG_NAME="$APP_NAME.dmg"
 DIST_DIR="dist"
 
 echo "🧹 Cleaning up previous builds..."
-rm -rf "$DIST_DIR/$DMG_NAME" build __pycache__
+rm -rf "$DIST_DIR/$DMG_NAME" 
 
 if [ ! -d "$DIST_DIR/$APP_BUNDLE" ]; then
   echo "Error: $DIST_DIR/$APP_BUNDLE not found."
