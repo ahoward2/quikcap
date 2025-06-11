@@ -11,11 +11,11 @@ echo "🧹 Cleaning up previous builds..."
 rm -rf "$DIST_DIR/$DMG_NAME" build __pycache__
 
 if [ ! -d "$DIST_DIR/$APP_BUNDLE" ]; then
-  echo "❌ Error: $DIST_DIR/$APP_BUNDLE not found."
+  echo "Error: $DIST_DIR/$APP_BUNDLE not found."
   exit 1
 fi
 
-echo "📦 Creating DMG with create-dmg..."
+echo "Creating DMG with create-dmg..."
 create-dmg \
   --volname "$APP_NAME" \
   --window-size 500 300 \
@@ -24,4 +24,4 @@ create-dmg \
   "$DIST_DIR/$DMG_NAME" \
   "$DIST_DIR/$APP_BUNDLE"
 
-echo "✅ DMG created at: $DIST_DIR/$DMG_NAME"
+echo "DMG created at: $DIST_DIR/$DMG_NAME"
