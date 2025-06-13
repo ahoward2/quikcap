@@ -11,7 +11,8 @@ Fast and simple camera footage transfer.
   - [Running the app](#running-the-app)
   - [Build](#build)
     - [Building the app .exe](#building-the-app-exe)
-    - [Building Inno Installer Executable (Windows only)](#building-inno-installer-executable-windows-only)
+    - [Building dmg Executable (Mac)](#building-dmg-executable-mac)
+    - [Building Inno Installer Executable (Windows)](#building-inno-installer-executable-windows)
 - [SDLC](#sdlc)
 
 ## Download
@@ -88,7 +89,7 @@ Recommended to run the application with a debugger.
 **Mac / Linux**
 
 ```bash
-chmod +x build.sh
+chmod +x build_mac.sh
 ./build.sh
 ```
 
@@ -98,7 +99,14 @@ chmod +x build.sh
 ./build.bat
 ```
 
-#### Building Inno Installer Executable (Windows only)
+#### Building dmg Executable (Mac)
+
+```bash
+chmod +x build_dmg.sh
+./build_dmg.sh
+```
+
+#### Building Inno Installer Executable (Windows)
 
 1. Open the Inno Compiler Application.
 2. Select `setup.iss` and execute script.
