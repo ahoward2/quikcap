@@ -21,6 +21,10 @@ jobs:
         run: pip install uv
         timeout-minutes: 5
 
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+        timeout-minutes: 5
+
       - name: Install dependencies with uv
         run: uv sync
         timeout-minutes: 10
